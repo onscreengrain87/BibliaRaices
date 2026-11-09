@@ -150,9 +150,10 @@ async function copy(t) {
 }
 
 /* ---------- Acciones de versículo ---------- */
+const refreshAfter = v => (curView === 'par' && window.renderParasha) ? renderParasha(true) : render(v);
 const COLORS = { gold: '#e8b84a', green: '#6fbf7a', blue: '#5b9be0', rose: '#e0708a', violet: '#9b7be0' };
-async function verseSheet(v) {
-  const { b, c } = POS, k = `${b}.${c}.${v}`, m = MARKS[k] || {};
+async function verseSheet(v, b = POS.b, c = POS.c) {
+  const k = `${b}.${c}.${v}`, m = MARKS[k] || {};
   const P = ver(S.primary);
   const pd = P ? await getBook(P.id, b) : null;
   const txt = xform((pd && pd[c - 1] && pd[c - 1][v - 1]) || '', 'es');
@@ -170,8 +171,8 @@ async function verseSheet(v) {
     <div class="chips">${ONLINE.map(x => `<button class="chip" data-o="${x}">${x}</button>`).join('')}</div>
     <div class="sect">Todas las versiones</div><div id="cmpBox"><div class="spin"></div></div>`);
   const upd = patch => { MARKS[k] = Object.assign({}, MARKS[k], patch, { t: Date.now() }); const x = MARKS[k]; if (!x.hl && !x.bm && !x.note) delete MARKS[k]; saveMarks(); };
-  $$('.sw', $('#sheetBody')).forEach(s => s.onclick = () => { upd({ hl: s.dataset.c }); closeSheet(); render(v); });
-  $('#aBm').onclick = () => { upd({ bm: !m.bm }); toast(m.bm ? 'Marcador quitado' : 'Marcador guardado'); closeSheet(); render(v); };
+  $$('.sw', $('#sheetBody')).forEach(s => s.onclick = () => { upd({ hl: s.dataset.c }); closeSheet(); refreshAfter(v); });
+  $('#aBm').onclick = () => { upd({ bm: !m.bm }); toast(m.bm ? 'Marcador quitado' : 'Marcador guardado'); closeSheet(); refreshAfter(v); };
   $$('.chip', $('#sheetBody')).forEach(x => x.onclick = () => openOnline(b, c, v, x.dataset.o));
   $('#aCopy').onclick = () => copy(`${txt}\n— ${refStr(b, c, v)} (${P.short})`);
   $('#aShare').onclick = () => { const t = `${txt}\n— ${refStr(b, c, v)} (${P.short})`; window.Android ? Android.share(t) : copy(t); };
@@ -180,7 +181,7 @@ async function verseSheet(v) {
       <textarea id="noteTx" placeholder="Raíz hebrea, contexto, conexión con la Torá...">${esc(m.note || '')}</textarea>
       <button class="btn gold full" id="noteSave">Guardar nota</button>`);
     $('#noteTx').focus();
-    $('#noteSave').onclick = () => { upd({ note: $('#noteTx').value.trim() }); closeSheet(); render(v); toast('Nota guardada'); };
+    $('#noteSave').onclick = () => { upd({ note: $('#noteTx').value.trim() }); closeSheet(); refreshAfter(v); toast('Nota guardada'); };
   };
   // comparar
   const rows = await Promise.all(VERSIONS.filter(x => hasBook(x, b)).map(async x => {
@@ -200,26 +201,42 @@ function openOnline(b, c, v, code) {
 
 /* ---------- Léxico Strong ---------- */
 const FINALS = { 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
+const LETTERS = { 'א': 'Álef', 'ב': 'Bet', 'ג': 'Guímel', 'ד': 'Dálet', 'ה': 'He', 'ו': 'Vav', 'ז': 'Záyin', 'ח': 'Jet', 'ט': 'Tet', 'י': 'Yod', 'כ': 'Kaf', 'ל': 'Lámed', 'מ': 'Mem', 'נ': 'Nun', 'ס': 'Sámej', 'ע': 'Áyin', 'פ': 'Pe', 'צ': 'Tsade', 'ק': 'Kof', 'ר': 'Resh', 'ש': 'Shin', 'ת': 'Tav' };
+const LEXES = {};
+function getLexEs(k) { if (!LEXES[k]) LEXES[k] = loadJSON('lex/' + k + '_es.json').catch(() => ({})); return LEXES[k]; }
 async function showLex(num, el, kind = 'H') {
   $$('.w.sel').forEach(x => x.classList.remove('sel'));
   if (el) el.classList.add('sel');
   openSheet('<div class="spin"></div>');
-  const lex = await getLex(kind), e = lex[num];
+  const [lex, les] = await Promise.all([getLex(kind), getLexEs(kind)]);
+  const e = lex[num];
   if (!e) { openSheet(`<h3>${kind}${num}</h3><div class="muted">Léxico no disponible.</div>`); return; }
   const [lemma, xlit, pron, def, deriv, kjv] = e;
+  const [esDef, esTr] = les[num] || [];
   const letters = kind === 'H' ? [...lemma.replace(/[\u0591-\u05C7]/g, '')].filter(ch => /[\u05D0-\u05EA]/.test(ch)).map(ch => FINALS[ch] || ch) : [];
   const word = el ? el.textContent : '';
-  openSheet(`<div class="lex-top"><span class="lex-lemma" ${kind === 'G' ? 'style="direction:ltr;font-family:var(--serif)"' : ''}>${esc(lemma)}</span>
-      <span class="lex-num">${kind}${num}</span><span class="lex-x">${esc(xlit)}${pron ? ' · ' + esc(pron) : ''}</span></div>
-    ${word ? `<div class="lex-sm">En el texto: <span style="font-family:var(--heb);font-size:20px;color:var(--or)">${esc(word)}</span></div>` : ''}
-    ${letters.length ? `<div class="sect">Letras del lema</div><div class="root">${letters.map(l => `<span>${l}</span>`).join('')}</div>` : ''}
-    <div class="sect">Definición (Strong)</div><div class="lex-def">${esc(def) || '—'}</div>
-    ${deriv ? `<div class="lex-sm"><b>Derivación:</b> ${esc(deriv)}</div>` : ''}
-    ${kjv ? `<div class="lex-sm" style="margin-top:6px"><b>Traducido (KJV):</b> ${esc(kjv)}</div>` : ''}
+  const vEl = el && el.closest('.v');
+  const vb = vEl && +vEl.dataset.b || POS.b, vc = vEl && +vEl.dataset.c || POS.c, vv = vEl && +vEl.dataset.v;
+  let ctx = '';
+  if (vv) { const P = ver(S.primary); const d = P && hasBook(P, vb) ? await getBook(P.id, vb) : null; ctx = d && d[vc - 1] ? xform(d[vc - 1][vv - 1] || '', 'es') : ''; }
+  const trTxt = esTr || kjv || '';
+  openSheet(`<div class="lex-head">
+      <div class="lex-lemma" ${kind === 'G' ? 'style="direction:ltr;font-family:var(--serif)"' : ''}>${esc(lemma)}</div>
+      <div class="lex-meta"><span class="lex-num">${kind}${num}</span><span class="lex-x">${esc(xlit)}${pron ? ' · ' + esc(pron) : ''}</span>
+      ${word ? `<span class="lex-word">En el texto: <b>${esc(word)}</b></span>` : ''}</div></div>
+    <div class="tr-card"><div class="tr-lb">Traducción</div><div class="tr-tx">${esc(trTxt) || '—'}</div>${!esTr && kjv ? '<div class="tr-note">(en inglés; la traducción al español se genera al compilar)</div>' : ''}</div>
+    ${esDef || def ? `<div class="sect">Significado</div><div class="lex-def">${esc(esDef || def)}</div>` : ''}
+    ${letters.length ? `<div class="sect">Letras de la palabra</div><div class="root">${letters.map(l => `<span><b>${l}</b><i>${LETTERS[l] || ''}</i></span>`).join('')}</div>` : ''}
+    ${ctx ? `<div class="sect">En ${esc(refStr(vb, vc, vv))}</div><div class="quote">${esc(ctx)}</div>` : ''}
+    <details class="lex-en"><summary>Strong original (inglés)</summary>
+      <div class="lex-sm">${esc(def)}</div>
+      ${deriv ? `<div class="lex-sm"><b>Derivación:</b> ${esc(deriv)}</div>` : ''}
+      ${kjv ? `<div class="lex-sm"><b>KJV:</b> ${esc(kjv)}</div>` : ''}
+    </details>
     ${kind === 'H' ? `<button class="btn gold full" id="lexAll">Ver todas las apariciones de ${kind}${num}</button>` : ''}
     <button class="btn full" id="lexCopy">Copiar</button>`);
   const all = $('#lexAll'); if (all) all.onclick = () => { closeSheet(); showView('search'); $('#q').value = kind + num; runSearch(); };
-  $('#lexCopy').onclick = () => copy(`${lemma} (${kind}${num}) ${xlit} — ${def}`);
+  $('#lexCopy').onclick = () => copy(`${lemma} (${kind}${num}) ${xlit} — ${trTxt}${esDef ? '\n' + esDef : ''}`);
 }
 
 /* ---------- Selector de libro/capítulo ---------- */
@@ -242,7 +259,7 @@ function renderPicker(bookSel) {
   if (pickTab === 'par') {
     body.innerHTML = '<div class="muted" style="margin-bottom:10px">Porciones semanales de la Torá (inicio de cada parashá)</div>' +
       PARASHOT.map((p, i) => `<button class="par" data-i="${i}"><span><b>${i + 1}. ${esc(p[0])}</b><small>${esc(refStr(p[2], p[3], p[4]))}</small></span><span class="h">${p[1]}</span></button>`).join('');
-    body.querySelectorAll('.par').forEach(x => x.onclick = () => { const p = PARASHOT[+x.dataset.i]; closePicker(); goTo(p[2], p[3], p[4]); });
+    body.querySelectorAll('.par').forEach(x => x.onclick = () => { closePicker(); openParasha(+x.dataset.i); });
     return;
   }
   // orden tradicional en español con secciones aproximadas
@@ -391,6 +408,7 @@ function showView(v) {
   $$('.view').forEach(x => x.style.paddingTop = v === 'read' ? '' : '8px');
   if (v === 'marks') renderMarks();
   if (v === 'set') renderSettings();
+  if (v === 'par' && window.renderParasha) renderParasha();
 }
 $('#bottom').addEventListener('click', e => { const b = e.target.closest('button'); if (b) showView(b.dataset.v); });
 window.appBack = () => {
