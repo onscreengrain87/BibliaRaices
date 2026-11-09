@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Biblia Raíces</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body class="t-night">
+<header id="top">
+  <button id="refBtn" class="pill"><span id="refTxt">Génesis 1</span><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></button>
+  <div class="grow"></div>
+  <button id="verBtn" class="pill small">RV1909</button>
+  <button id="origBtn" class="icon" title="Texto original"><span class="alef">א</span></button>
+</header>
+
+<main id="views">
+  <section id="v-read" class="view on">
+    <div id="reader"></div>
+  </section>
+
+  <section id="v-search" class="view">
+    <div class="pad">
+      <h2>Buscar</h2>
+      <div class="searchbox">
+        <input id="q" type="search" placeholder="Palabra, frase o número Strong (H430)" autocomplete="off">
+        <button id="qGo" class="btn gold">Buscar</button>
+      </div>
+      <div class="row-opts">
+        <select id="qVer"></select>
+        <label class="chk"><input type="checkbox" id="qWhole"> Palabra exacta</label>
+      </div>
+      <div id="qInfo" class="muted"></div>
+      <div id="results"></div>
+    </div>
+  </section>
+
+  <section id="v-marks" class="view">
+    <div class="pad">
+      <h2>Mis estudios</h2>
+      <div class="tabs" id="markTabs">
+        <button data-t="all" class="on">Todo</button><button data-t="bm">Marcadores</button>
+        <button data-t="hl">Resaltados</button><button data-t="note">Notas</button>
+      </div>
+      <div id="markList"></div>
+    </div>
+  </section>
+
+  <section id="v-set" class="view">
+    <div class="pad" id="settings"></div>
+  </section>
+</main>
+
+<nav id="bottom">
+  <button data-v="read" class="on"><svg viewBox="0 0 24 24"><path d="M4 5c3-1 6-1 8 1v14c-2-2-5-2-8-1zM20 5c-3-1-6-1-8 1v14c2-2 5-2 8-1z"/></svg><span>Leer</span></button>
+  <button data-v="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span>Buscar</span></button>
+  <button data-v="marks"><svg viewBox="0 0 24 24"><path d="M7 4h10v16l-5-4-5 4z"/></svg><span>Estudios</span></button>
+  <button data-v="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg><span>Ajustes</span></button>
+</nav>
+
+<div id="picker" class="overlay">
+  <div class="sheet tall">
+    <div class="grab"></div>
+    <div class="tabs" id="pickTabs">
+      <button data-t="ot" class="on">Tanaj · AT</button><button data-t="nt">Brit Jadashá · NT</button><button data-t="par">Parashot</button>
+    </div>
+    <div id="pickBody"></div>
+  </div>
+</div>
+
+<div id="sheet" class="overlay"><div class="sheet"><div class="grab"></div><div id="sheetBody"></div></div></div>
+<div id="toast"></div>
+
+<script src="books.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
