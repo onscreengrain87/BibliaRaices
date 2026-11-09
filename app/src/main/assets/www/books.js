@@ -1,0 +1,51 @@
+// [nombre, abreviatura, capítulos, nombre hebreo, transliteración]
+const BOOKS = [
+ ['Génesis','Gn',50,'בְּרֵאשִׁית','Bereshit'],['Éxodo','Éx',40,'שְׁמוֹת','Shemot'],
+ ['Levítico','Lv',27,'וַיִּקְרָא','Vayikrá'],['Números','Nm',36,'בְּמִדְבַּר','Bamidbar'],
+ ['Deuteronomio','Dt',34,'דְּבָרִים','Devarim'],['Josué','Jos',24,'יְהוֹשֻׁעַ','Yehoshúa'],
+ ['Jueces','Jue',21,'שׁוֹפְטִים','Shoftim'],['Rut','Rt',4,'רוּת','Rut'],
+ ['1 Samuel','1S',31,'שְׁמוּאֵל א','Shmuel Alef'],['2 Samuel','2S',24,'שְׁמוּאֵל ב','Shmuel Bet'],
+ ['1 Reyes','1R',22,'מְלָכִים א','Melajim Alef'],['2 Reyes','2R',25,'מְלָכִים ב','Melajim Bet'],
+ ['1 Crónicas','1Cr',29,'דִּבְרֵי הַיָּמִים א','Divrei HaYamim Alef'],['2 Crónicas','2Cr',36,'דִּבְרֵי הַיָּמִים ב','Divrei HaYamim Bet'],
+ ['Esdras','Esd',10,'עֶזְרָא','Ezrá'],['Nehemías','Neh',13,'נְחֶמְיָה','Nejemyá'],
+ ['Ester','Est',10,'אֶסְתֵּר','Ester'],['Job','Job',42,'אִיּוֹב','Iyov'],
+ ['Salmos','Sal',150,'תְּהִלִּים','Tehilim'],['Proverbios','Pr',31,'מִשְׁלֵי','Mishlé'],
+ ['Eclesiastés','Ec',12,'קֹהֶלֶת','Kohélet'],['Cantares','Cnt',8,'שִׁיר הַשִּׁירִים','Shir HaShirim'],
+ ['Isaías','Is',66,'יְשַׁעְיָהוּ','Yeshayahu'],['Jeremías','Jer',52,'יִרְמְיָהוּ','Yirmeyahu'],
+ ['Lamentaciones','Lm',5,'אֵיכָה','Ejá'],['Ezequiel','Ez',48,'יְחֶזְקֵאל','Yejezkel'],
+ ['Daniel','Dn',12,'דָּנִיֵּאל','Daniyel'],['Oseas','Os',14,'הוֹשֵׁעַ','Hoshea'],
+ ['Joel','Jl',3,'יוֹאֵל','Yoel'],['Amós','Am',9,'עָמוֹס','Amós'],
+ ['Abdías','Abd',1,'עֹבַדְיָה','Ovadyá'],['Jonás','Jon',4,'יוֹנָה','Yoná'],
+ ['Miqueas','Mi',7,'מִיכָה','Mijá'],['Nahúm','Nah',3,'נַחוּם','Najum'],
+ ['Habacuc','Hab',3,'חֲבַקּוּק','Javakuk'],['Sofonías','Sof',3,'צְפַנְיָה','Tsefanyá'],
+ ['Hageo','Hag',2,'חַגַּי','Jagai'],['Zacarías','Zac',14,'זְכַרְיָה','Zejaryá'],
+ ['Malaquías','Mal',4,'מַלְאָכִי','Malají'],
+ ['Mateo','Mt',28,'','Mattityahu'],['Marcos','Mr',16,'','Markos'],['Lucas','Lc',24,'','Lukas'],
+ ['Juan','Jn',21,'','Yojanán'],['Hechos','Hch',28,'',''],['Romanos','Ro',16,'',''],
+ ['1 Corintios','1Co',16,'',''],['2 Corintios','2Co',13,'',''],['Gálatas','Gá',6,'',''],
+ ['Efesios','Ef',6,'',''],['Filipenses','Flp',4,'',''],['Colosenses','Col',4,'',''],
+ ['1 Tesalonicenses','1Ts',5,'',''],['2 Tesalonicenses','2Ts',3,'',''],['1 Timoteo','1Ti',6,'',''],
+ ['2 Timoteo','2Ti',4,'',''],['Tito','Tit',3,'',''],['Filemón','Flm',1,'',''],
+ ['Hebreos','He',13,'',''],['Santiago','Stg',5,'','Yaakov'],['1 Pedro','1P',5,'','Kefá Alef'],
+ ['2 Pedro','2P',3,'','Kefá Bet'],['1 Juan','1Jn',5,'','Yojanán Alef'],['2 Juan','2Jn',1,'','Yojanán Bet'],
+ ['3 Juan','3Jn',1,'','Yojanán Guímel'],['Judas','Jud',1,'','Yehudá'],['Apocalipsis','Ap',22,'','']
+].map((b,i)=>({id:i+1,es:b[0],ab:b[1],ch:b[2],he:b[3],tr:b[4]}));
+
+// Parashot semanales de la Torá: [nombre, hebreo, libro, cap, vers] (versificación española)
+const PARASHOT = [
+ ['Bereshit','בְּרֵאשִׁית',1,1,1],['Nóaj','נֹחַ',1,6,9],['Lej Lejá','לֶךְ־לְךָ',1,12,1],['Vayerá','וַיֵּרָא',1,18,1],
+ ['Jayé Sará','חַיֵּי שָׂרָה',1,23,1],['Toldot','תּוֹלְדֹת',1,25,19],['Vayetsé','וַיֵּצֵא',1,28,10],['Vayishlaj','וַיִּשְׁלַח',1,32,3],
+ ['Vayéshev','וַיֵּשֶׁב',1,37,1],['Mikets','מִקֵּץ',1,41,1],['Vayigash','וַיִּגַּשׁ',1,44,18],['Vayejí','וַיְחִי',1,47,28],
+ ['Shemot','שְׁמוֹת',2,1,1],['Vaerá','וָאֵרָא',2,6,2],['Bo','בֹּא',2,10,1],['Beshalaj','בְּשַׁלַּח',2,13,17],
+ ['Yitró','יִתְרוֹ',2,18,1],['Mishpatim','מִּשְׁפָּטִים',2,21,1],['Terumá','תְּרוּמָה',2,25,1],['Tetsavé','תְּצַוֶּה',2,27,20],
+ ['Ki Tisá','כִּי תִשָּׂא',2,30,11],['Vayakhel','וַיַּקְהֵל',2,35,1],['Pekudé','פְקוּדֵי',2,38,21],
+ ['Vayikrá','וַיִּקְרָא',3,1,1],['Tsav','צַו',3,6,8],['Sheminí','שְּׁמִינִי',3,9,1],['Tazría','תַזְרִיעַ',3,12,1],
+ ['Metsorá','מְּצֹרָע',3,14,1],['Ajaré Mot','אַחֲרֵי מוֹת',3,16,1],['Kedoshim','קְדֹשִׁים',3,19,1],['Emor','אֱמֹר',3,21,1],
+ ['Behar','בְּהַר',3,25,1],['Bejukotai','בְּחֻקֹּתַי',3,26,3],
+ ['Bamidbar','בְּמִדְבַּר',4,1,1],['Nasó','נָשֹׂא',4,4,21],['Behaalotejá','בְּהַעֲלֹתְךָ',4,8,1],['Shelaj','שְׁלַח־לְךָ',4,13,1],
+ ['Kóraj','קֹרַח',4,16,1],['Jukat','חֻקַּת',4,19,1],['Balak','בָּלָק',4,22,2],['Pinjás','פִּינְחָס',4,25,10],
+ ['Matot','מַּטּוֹת',4,30,1],['Masé','מַסְעֵי',4,33,1],
+ ['Devarim','דְּבָרִים',5,1,1],['Vaetjanán','וָאֶתְחַנַּן',5,3,23],['Ékev','עֵקֶב',5,7,12],['Reé','רְאֵה',5,11,26],
+ ['Shoftim','שֹׁפְטִים',5,16,18],['Ki Tetsé','כִּי־תֵצֵא',5,21,10],['Ki Tavó','כִּי־תָבוֹא',5,26,1],['Nitsavim','נִצָּבִים',5,29,10],
+ ['Vayélej','וַיֵּלֶךְ',5,31,1],['Haazinu','הַאֲזִינוּ',5,32,1],['Vezot HaBerajá','וְזֹאת הַבְּרָכָה',5,33,1]
+];
