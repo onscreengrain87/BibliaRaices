@@ -1,0 +1,53 @@
+name: Compilar APK
+
+on:
+  push:
+    paths: [ 'proyecto.zip', '.github/workflows/build.yml' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar que exista proyecto.zip
+        id: z
+        run: if [ -f proyecto.zip ]; then echo "ok=true" >> $GITHUB_OUTPUT; else echo "Falta subir proyecto.zip"; fi
+
+      - name: Descomprimir proyecto
+        if: steps.z.outputs.ok == 'true'
+        run: unzip -o -q proyecto.zip
+
+      - uses: actions/setup-python@v5
+        if: steps.z.outputs.ok == 'true'
+        with: { python-version: '3.12' }
+
+      - name: Descargar y convertir textos biblicos
+        if: steps.z.outputs.ok == 'true'
+        run: python scripts/build_data.py app/src/main/assets
+
+      - name: Fuente hebrea (opcional)
+        if: steps.z.outputs.ok == 'true'
+        continue-on-error: true
+        run: |
+          mkdir -p app/src/main/assets/fonts
+          curl -fsSL "https://github.com/notofonts/notofonts.github.io/raw/main/fonts/NotoSerifHebrew/hinted/ttf/NotoSerifHebrew-Regular.ttf" -o app/src/main/assets/fonts/HebrewSerif.ttf || true
+
+      - uses: actions/setup-java@v4
+        if: steps.z.outputs.ok == 'true'
+        with: { distribution: temurin, java-version: '17' }
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.z.outputs.ok == 'true'
+        with: { gradle-version: '8.11.1' }
+
+      - name: Compilar
+        if: steps.z.outputs.ok == 'true'
+        run: gradle assembleDebug --no-daemon && cp app/build/outputs/apk/debug/app-debug.apk BibliaRaices.apk
+
+      - uses: actions/upload-artifact@v4
+        if: steps.z.outputs.ok == 'true'
+        with:
+          name: BibliaRaices-apk
+          path: BibliaRaices.apk
