@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+concurrency:
+  group: build
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,6 +20,24 @@ jobs:
 
       - name: Descargar y convertir textos biblicos
         run: python scripts/build_data.py app/src/main/assets
+
+      - name: Calendario de parashot (Hebcal)
+        continue-on-error: true
+        run: python scripts/parashot.py app/src/main/assets
+
+      - name: Cache de traducciones del lexico
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/src/main/assets/lex/H_es.json
+            app/src/main/assets/lex/G_es.json
+          key: lex-es-v1-${{ hashFiles('scripts/translate_lex.py') }}
+
+      - name: Traducir lexico al espanol
+        continue-on-error: true
+        run: |
+          pip install ctranslate2 sentencepiece
+          python scripts/translate_lex.py app/src/main/assets
 
       - name: Fuente hebrea (opcional)
         continue-on-error: true
