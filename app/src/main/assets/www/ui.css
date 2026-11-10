@@ -63,3 +63,16 @@
 .lex-en { margin-top: 14px; background: var(--bg2); border-radius: 12px; padding: 10px 14px; }
 .lex-en summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--mu); }
 .lex-en .lex-sm { margin-top: 8px; }
+
+/* Pronunciación bajo cada palabra hebrea */
+.v .or.rtl { line-height: 1.5; padding: 8px 8px 4px; }
+.v .or.rtl .w { display: inline-flex; flex-direction: column; align-items: center; vertical-align: top;
+  margin: 0 2px 6px; padding: 2px 3px; }
+.v .or.rtl .w .hw { line-height: 1.5; }
+.v .or.rtl .w .tl { direction: ltr; font-family: var(--sans); font-size: .5em; font-style: italic; color: var(--mu);
+  letter-spacing: .02em; margin-top: -2px; }
+.v .or .w.sel .tl { color: var(--bg); }
+.no-tl .v .or.rtl .w { display: inline; margin: 0; padding: 0 1px; }
+.no-tl .v .or.rtl .w .tl { display: none; }
+.no-tl .v .or.rtl { line-height: 1.9; }
+.lex-word i { color: var(--ac); }
