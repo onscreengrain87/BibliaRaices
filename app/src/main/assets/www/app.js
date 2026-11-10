@@ -11,7 +11,7 @@ const LS = {
 
 const DEFAULTS = {
   primary: 'SpaRV', showOrig: true, origNT: 'TR', layout: 'stack', theme: 'night', size: 19,
-  divine: 'Jehová', yeshua: false, hideBars: true
+  divine: 'Jehová', yeshua: false, hideBars: true, translit: true
 };
 let S = Object.assign({}, DEFAULTS, LS.get('settings', {}));
 let POS = LS.get('pos', { b: 1, c: 1 });
@@ -84,7 +84,7 @@ async function render(scrollTo) {
     h += `<div class="${cls}" data-v="${v}" id="v${v}"><div class="es-wrap"><span class="es"><sup>${v}</sup>${esc(xform(pv[i], 'es')) || '<span class="muted">—</span>'}</span>${m.note ? ' <i class="nt">✎</i>' : ''}</div>`;
     if (O && ov[i]) {
       const o = ov[i];
-      const inner = Array.isArray(o) ? o.map(w => `<span class="w" data-s="${w[1]}">${esc(w[0])}</span>`).join(' ') : esc(o);
+      const inner = Array.isArray(o) ? o.map(wordHTML).join(' ') : esc(o);
       h += `<div class="or ${O.dir}" lang="${O.lang}">${inner}</div>`;
     }
     h += '</div>';
@@ -214,7 +214,8 @@ async function showLex(num, el, kind = 'H') {
   const [lemma, xlit, pron, def, deriv, kjv] = e;
   const [esDef, esTr] = les[num] || [];
   const letters = kind === 'H' ? [...lemma.replace(/[\u0591-\u05C7]/g, '')].filter(ch => /[\u05D0-\u05EA]/.test(ch)).map(ch => FINALS[ch] || ch) : [];
-  const word = el ? el.textContent : '';
+  const word = el ? (el.querySelector('.hw') || el).textContent : '';
+  const wordTl = el && el.querySelector('.tl') ? el.querySelector('.tl').textContent : '';
   const vEl = el && el.closest('.v');
   const vb = vEl && +vEl.dataset.b || POS.b, vc = vEl && +vEl.dataset.c || POS.c, vv = vEl && +vEl.dataset.v;
   let ctx = '';
@@ -223,7 +224,7 @@ async function showLex(num, el, kind = 'H') {
   openSheet(`<div class="lex-head">
       <div class="lex-lemma" ${kind === 'G' ? 'style="direction:ltr;font-family:var(--serif)"' : ''}>${esc(lemma)}</div>
       <div class="lex-meta"><span class="lex-num">${kind}${num}</span><span class="lex-x">${esc(xlit)}${pron ? ' · ' + esc(pron) : ''}</span>
-      ${word ? `<span class="lex-word">En el texto: <b>${esc(word)}</b></span>` : ''}</div></div>
+      ${word ? `<span class="lex-word">En el texto: <b>${esc(word)}</b>${wordTl ? ` · <i>${esc(wordTl)}</i>` : ''}</span>` : ''}</div></div>
     <div class="tr-card"><div class="tr-lb">Traducción</div><div class="tr-tx">${esc(trTxt) || '—'}</div>${!esTr && kjv ? '<div class="tr-note">(en inglés; la traducción al español se genera al compilar)</div>' : ''}</div>
     ${esDef || def ? `<div class="sect">Significado</div><div class="lex-def">${esc(esDef || def)}</div>` : ''}
     ${letters.length ? `<div class="sect">Letras de la palabra</div><div class="root">${letters.map(l => `<span><b>${l}</b><i>${LETTERS[l] || ''}</i></span>`).join('')}</div>` : ''}
@@ -350,7 +351,7 @@ $('#markList').addEventListener('click', e => { const r = e.target.closest('.res
 /* ---------- Ajustes ---------- */
 const THEMES = { night: ['Noche', '#141114'], parch: ['Pergamino', '#f3e9d2'], day: ['Día', '#fbfaf7'] };
 function applyLook() {
-  document.body.className = 't-' + S.theme + (S.layout === 'cols' ? ' lay-cols' : '');
+  document.body.className = 't-' + S.theme + (S.layout === 'cols' ? ' lay-cols' : '') + (S.translit ? '' : ' no-tl');
   document.documentElement.style.setProperty('--size', S.size + 'px');
   if (window.Android) Android.setBars(THEMES[S.theme][1]);
 }
@@ -369,6 +370,7 @@ function renderSettings() {
   <div class="sect">Textos</div>
   <div class="set-group">
     <div class="set-row"><div class="l">Mostrar texto original<small>Hebreo (AT) · Griego (NT)</small></div>${sw('showOrig')}</div>
+    <div class="set-row"><div class="l">Pronunciación del hebreo<small>Cómo se lee cada palabra</small></div>${sw('translit')}</div>
     ${greek.length > 1 ? `<div class="set-row"><div class="l">Griego del NT</div>${seg('origNT', greek.map(g => [g.id, g.short]))}</div>` : ''}
   </div>
   <div class="sect">Raíces hebreas</div>
@@ -387,7 +389,7 @@ function renderSettings() {
   Textos de dominio público o distribución libre (CrossWire / scrollmapper). Texto masorético: Westminster Leningrad Codex con morfología y números Strong de Open Scriptures Hebrew Bible (CC BY 4.0). Léxico: Strong (dominio público) vía Open Scriptures.<br><br>
   Nota: el hebreo usa la versificación masorética; en algunos capítulos (p. ej. títulos de Salmos, Malaquías 4) los números de versículo difieren de la versión española.</div>`;
   $$('#settings .seg').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; S[g.dataset.k] = b.dataset.v; save(); applyLook(); renderSettings(); render(); });
-  $$('#settings [data-sw]').forEach(b => b.onclick = () => { S[b.dataset.sw] = !S[b.dataset.sw]; save(); renderSettings(); render(); });
+  $$('#settings [data-sw]').forEach(b => b.onclick = () => { S[b.dataset.sw] = !S[b.dataset.sw]; save(); applyLook(); renderSettings(); render(); });
   $('#sz').oninput = e => { S.size = +e.target.value; $('#szl').textContent = S.size + 'px'; applyLook(); save(); };
   $('#divine').onchange = e => { S.divine = e.target.value; save(); render(); };
   $('#exp').onclick = () => copy(JSON.stringify(MARKS));
