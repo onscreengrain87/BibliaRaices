@@ -12,6 +12,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -58,3 +60,11 @@ jobs:
         with:
           name: BibliaRaices-apk
           path: BibliaRaices.apk
+
+      - name: Publicar APK (link fijo)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Biblia Raíces v${{ github.run_number }}
+          files: BibliaRaices.apk
+          make_latest: true
