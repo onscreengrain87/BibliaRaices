@@ -79,7 +79,7 @@ async function rangeHTML(r) {
       const cls = ['v', m.hl ? 'hl-' + m.hl : '', m.bm ? 'bm' : '', O && ov[v - 1] ? 'has-or' : ''].join(' ');
       h += `<div class="${cls}" data-b="${b}" data-c="${c}" data-v="${v}"><div class="es-wrap"><span class="es"><sup>${c1 !== c2 ? c + ':' : ''}${v}</sup>${esc(xform(pv[v - 1], 'es')) || '<span class="muted">—</span>'}</span>${m.note ? ' <i class="nt">✎</i>' : ''}</div>`;
       const o = ov[v - 1];
-      if (O && o) h += `<div class="or ${O.dir}" lang="${O.lang}">${Array.isArray(o) ? o.map(w => `<span class="w" data-s="${w[1]}">${esc(w[0])}</span>`).join(' ') : esc(o)}</div>`;
+      if (O && o) h += `<div class="or ${O.dir}" lang="${O.lang}">${Array.isArray(o) ? o.map(wordHTML).join(' ') : esc(o)}</div>`;
       h += '</div>';
     }
   }
